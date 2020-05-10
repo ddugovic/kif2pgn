@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of the kif2pgn library.
+# This file is part of the kif2psn library.
 # Copyright (C) 2013-2020 TANIGUCHI Takaki <takaki@asis.media-as.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,14 +21,14 @@ import io
 import setuptools
 
 setuptools.setup(
-    name = 'kif2pgn',
+    name = 'kif2psn',
     version = '0.1',
     author = 'TANIGUCHI Takaki',
     author_email = 'takaki@asis.media-as.org',
     description = 'Shogi kifu record converter',
     license = "GPL3",
     keywords = 'shogi csa kif',
-    url = 'https://github.com/takaki/kif2pgn',
+    url = 'https://github.com/takaki/kif2psn',
     scripts = [],
     classifiers = [
       'Intended Audience :: Developers',
