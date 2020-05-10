@@ -2,35 +2,20 @@
 # -*- coding: utf-8 -*-
     
 import sys
+    
 import re
     
-header="""V2.2
-$START_TIME:2013/01/01
-N+AAAA
-N-BBBB
-P1-KY-KE-GI-KI-OU-KI-GI-KE-KY
-P2 * -HI *  *  *  *  * -KA * 
-P3-FU-FU-FU-FU-FU-FU-FU-FU-FU
-P4 *  *  *  *  *  *  *  *  * 
-P5 *  *  *  *  *  *  *  *  * 
-P6 *  *  *  *  *  *  *  *  * 
-P7+FU+FU+FU+FU+FU+FU+FU+FU+FU
-P8 * +KA *  *  *  *  * +HI * 
-P9+KY+KE+GI+KI+OU+KI+GI+KE+KY
-+"""
-    
+header='[SFEN "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1"]'
+alpha =   list('abcdefghi')
 zensuji = list('１２３４５６７８９')
 kansuji = list('一二三四五六七八九')
     
 zen_map = dict(zip(zensuji, range(1,10)))
-kan_map = dict(zip(kansuji, range(1,10)))
+kan_map = dict(zip(kansuji, alpha))
     
 piece   = '歩香桂銀金角飛玉と馬龍'
-piece_map   = dict(zip(list('歩香桂銀金角飛玉と馬龍'),
-                   ['FU','KY','KE','GI','KI','KA','HI','OU','TO','UM','RY']))
-piece_n_map = dict(zip(list('香桂銀'), ['NY', 'NK', 'NG']))
-promotion_map = dict(zip(['FU', 'KY', 'KE', 'GI', 'KA', 'HI'],
-                         ['TO', 'NY', 'NK', 'NG', 'UM', 'RY']))
+piece_map   = dict(zip(list('歩香桂銀金角飛玉') + list('と馬龍'),
+                       list('PLNSGBRK')+ ['+P', '+B', '+R']))
     
 line_re = re.compile('( *\\d+) +([^ ]+)')
 
@@ -54,39 +39,41 @@ def parse_kif(f):
                 piace_name = piece_map[s[2]]
                 rest = s[3:]
             elif s[2] == '成':
-                piace_name = piece_n_map[s[3]]
+                piace_name = '+' + piece_map[s[3]]
                 rest = s[4:]
             else:
                 raise RuntimeError("Unknown Piece", s[2])
             promote = ''
             if rest[0] == '成':
-                piace_name = promotion_map[piace_name]
-                prev_position = rest[2] + rest[3]
+                promote = '+'
+                prev_position = rest[2] + alpha[int(rest[3])-1] + '-'
             elif rest[0] == '打':
-                prev_position = '00'
+                prev_position = '*'
             elif rest[0] == '(':
-                prev_position = rest[1] + rest[2]
+                prev_position = rest[1] + alpha[int(rest[2])-1] + '-'
             else:
                 raise RuntimeError("Unknown ???", rest[0])
-            move_list.append("%s%s%s" % (prev_position, next_position,
-                                         piace_name))
+            move_list.append("%s%s%s%s" % (piace_name, prev_position,
+                                           next_position , promote))
     return move_list
 
 
-def as_csa(move_list):
+def as_psn(move_list):
     s = header + '\n'
-    for i,j in enumerate(move_list):
-        if i % 2 == 0:
-            s += '+' + j + '\n'
-        else:
-            s += '-' + j + '\n'
+    if len(move_list) % 2 != 0:
+        move_list.append("")
+    move_black = move_list[0::2]
+    move_white = move_list[1::2]
+    pair = zip(move_black, move_white)
+    for i,j in enumerate(pair):
+        s += ("%d. %s %s" % (i+1, j[0], j[1])) + '\n'
     return s
 
 
 def main():
     f = open(sys.argv[1])
     move_list = parse_kif(f)
-    print(as_csa(header, move_list))
+    print(as_psn(header, move_list))
 
 
 if __name__ == '__main__':
